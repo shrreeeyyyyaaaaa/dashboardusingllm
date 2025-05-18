@@ -6,7 +6,23 @@ import docx
 import os
 
 # ------------------ Config ------------------
-openai.api_key = "OPENAI_API_KEY"
+from openai import OpenAI
+
+# Initialize client
+client = OpenAI(api_key="YOUR_API_KEY")  # or set OPENAI_API_KEY env variable
+
+# Use new format
+response = client.chat.completions.create(
+    model="gpt-4",
+    messages=[
+        {"role": "system", "content": "You are a helpful assistant."},
+        {"role": "user", "content": "Generate charts based on this data..."},
+    ],
+    temperature=0.7
+)
+
+generated_text = response.choices[0].message.content
+
 
 # ------------------ File Readers ------------------
 def read_requirements(file):
@@ -46,42 +62,39 @@ def summarize_dataframe(df):
     return "\n".join(lines)
 
 # ------------------ LLM Call for Dynamic Chart Code ------------------
-def ask_llm_for_charts(requirements, column_info, summary):
+from openai import OpenAI
+client = OpenAI()  # Make sure your API key is set in env or passed here
+
+def ask_llm_for_charts(requirements_text, column_info, summary):
     prompt = f"""
-You are a Python data visualization expert.
+    You are a data visualization expert. Based on the following requirements and data summary,
+    generate 3 chart configurations. Each configuration should be a JSON dict with:
+    - chart_type (bar, line, pie, scatter, heatmap)
+    - x (column name)
+    - y (optional)
+    - title
 
-Given:
-- User requirements
-- Data column descriptions
-- Statistical summaries
+    Requirements:\n{requirements_text}
+    Column Info:\n{column_info}
+    Summary:\n{summary}
+    """
 
-Generate 4 to 6 meaningful Plotly charts in JSON list format like this:
-
-[
-  {{
-    "title": "",
-    "theme": "",
-    "insight": "",
-  }},
-  ...
-]
-
-Only use 'df' as the dataframe variable. Do not import anything.
-
-### Requirements:
-{requirements}
-
-### Column Info:
-{column_info}
-
-### Summary:
-{summary}
-"""
-    response = openai.ChatCompletion.create(
+    response = client.chat.completions.create(
         model="gpt-4",
-        messages=[{"role": "user", "content": prompt}],
-        temperature=0.4
+        messages=[
+            {"role": "system", "content": "You generate chart specifications as JSON."},
+            {"role": "user", "content": prompt}
+        ],
+        temperature=0.3
     )
+
+    content = response.choices[0].message.content
+    try:
+        return json.loads(content)
+    except:
+        st.error("❌ Failed to parse LLM response. Check formatting.")
+        return []
+
     import json
     return json.loads(response['choices'][0]['message']['content'])
 
