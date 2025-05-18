@@ -19,7 +19,15 @@ def read_requirements(file):
 
 def read_data(file):
     if file.name.endswith(".csv"):
-        return pd.read_csv(file)
+        try:
+            return pd.read_csv(file)
+        except UnicodeDecodeError:
+            # Fallback encodings
+            try:
+                return pd.read_csv(file, encoding='ISO-8859-1')
+            except Exception as e:
+                st.error("❌ Failed to read CSV file. Try saving it as UTF-8 or upload as Excel.")
+                raise e
     elif file.name.endswith(".xlsx"):
         return pd.read_excel(file)
     return pd.DataFrame()
