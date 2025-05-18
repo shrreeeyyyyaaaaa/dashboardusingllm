@@ -2,5 +2,4 @@ streamlit
 openai
 pandas
 plotly
-plotly.express
 python-docx
