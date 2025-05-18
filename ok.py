@@ -9,7 +9,7 @@ import os
 from openai import OpenAI
 
 # Initialize client
-client = OpenAI(api_key="YOUR_API_KEY")  # or set OPENAI_API_KEY env variable
+client = OpenAI(api_key="OPENAI_API_KEY")
 
 # Use new format
 response = client.chat.completions.create(
