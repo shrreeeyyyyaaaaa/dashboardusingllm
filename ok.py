@@ -6,7 +6,7 @@ import docx
 import os
 
 # ------------------ Config ------------------
-openai.api_key = st.secrets.get("OPENAI_API_KEY", "sk-...")  # Replace with your key or set in .streamlit/secrets.toml
+openai.api_key = "OPENAI_API_KEY"
 
 # ------------------ File Readers ------------------
 def read_requirements(file):
